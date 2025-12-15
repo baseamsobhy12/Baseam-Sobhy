@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Suggestions - Snackers</title>
+	<link rel="stylesheet" href="snckers.css">
+	<script src="snackers.js" defer></script>
+	<style>
+		.suggestions-hero {
+			background: linear-gradient(135deg, #FF6B00 0%, #FF9800 100%);
+			color: #fff;
+			padding: 3rem 1rem;
+			text-align: center;
+		}
+		.suggestions-hero h1 {
+			font-size: 2.8rem;
+			font-weight: 900;
+			margin-bottom: 0.5rem;
+		}
+		.suggestions-container {
+			max-width: 1000px;
+			margin: 0 auto;
+			padding: 2rem 1rem;
+		}
+		.suggestion-form-wrap {
+			background: linear-gradient(135deg, #1f1f1f 0%, #2a2a2a 100%);
+			padding: 2rem;
+			border-radius: 12px;
+			box-shadow: 0 8px 24px rgba(255,107,0,0.1);
+			margin-bottom: 2rem;
+		}
+		#suggestion-form {
+			display: grid;
+			grid-template-columns: 1fr 1fr 1fr;
+			gap: 1rem;
+			align-items: end;
+		}
+		#suggestion-form button {
+			padding: 0.8rem 1.5rem;
+			background: linear-gradient(90deg, #FF6B00, #FF9800);
+			color: #fff;
+			border: none;
+			border-radius: 6px;
+			cursor: pointer;
+			font-weight: 700;
+			transition: all 0.3s;
+			height: fit-content;
+		}
+		#suggestion-form button:hover {
+			transform: translateY(-3px);
+			box-shadow: 0 8px 20px rgba(255,107,0,0.3);
+		}
+		.form-group label {
+			color: #FF9800;
+			font-weight: 700;
+		}
+		.form-group select {
+			background: #111;
+			color: #fff;
+			border: 2px solid #333;
+			padding: 0.7rem;
+		}
+		#suggestions-result {
+			margin-top: 2rem;
+		}
+		.result-header {
+			color: #FF6B00;
+			font-size: 1.5rem;
+			margin-bottom: 1.5rem;
+			font-weight: 700;
+		}
+		@media (max-width: 768px) {
+			#suggestion-form {
+				grid-template-columns: 1fr;
+			}
+		}
+	</style>
+</head>
+<body>
+	<header>
+		<nav class="main-nav">
+			<div class="logo">
+				<a href="snackers.html" style="text-decoration:none; color:inherit;">
+					<h1>Snackers</h1>
+				</a>
+			</div>
+			<div class="nav-links">
+				<a href="home.html">Home</a>
+				<a href="brands.html">Brands</a>
+				<a href="suggestions.html">Suggestions</a>
+				<a href="special-offers.html">Special Offers</a>
+				<span id="user-info"></span>
+				<button id="login-btn" class="login-btn">Login / Register</button>
+			</div>
+		</nav>
+	</header>
+
+	<div id="profile-display" class="profile-display" style="display:none;"></div>
+
+	<main>
+		<section class="suggestions-hero">
+			<h1>Get Personalized Suggestions</h1>
+			<p>Choose your brand and budget to find the perfect shoes</p>
+		</section>
+
+		<section class="suggestions-container">
+			<div class="suggestion-form-wrap">
+				<form id="suggestion-form">
+					<div class="form-group">
+						<label for="preferred-brand">Select Brand</label>
+						<select id="preferred-brand" required>
+							<option value="">Choose a brand</option>
+							<option value="nike">Nike</option>
+							<option value="adidas">Adidas</option>
+							<option value="puma">Puma</option>
+							<option value="reebok">Reebok</option>
+							<option value="new-balance">New Balance</option>
+							<option value="converse">Converse</option>
+							<option value="vans">Vans</option>
+							<option value="skechers">Skechers</option>
+							<option value="under">Under Armour</option>
+							<option value="fila">Fila</option>
+						</select>
+					</div>
+					<div class="form-group">
+						<label for="price-range">Price Range</label>
+						<select id="price-range" required>
+							<option value="">Choose range</option>
+							<option value="budget">Under $50</option>
+							<option value="mid">$50 - $100</option>
+							<option value="premium">$100 - $200</option>
+							<option value="luxury">Over $200</option>
+						</select>
+					</div>
+					<button type="submit">Get Suggestions</button>
+				</form>
+			</div>
+
+			<div id="suggestions-result"></div>
+
+			<section id="profile-section" style="display:none; margin-top:2rem;">
+				<div class="profile-card">
+					<img id="profile-card-avatar" class="profile-card-avatar" src="" alt="Profile avatar">
+					<div class="profile-card-info">
+						<h3 id="profile-card-name"></h3>
+						<p id="profile-card-bio"></p>
+						<div class="profile-card-actions">
+							<a id="profile-card-edit" href="profile.html" class="outline">Edit Profile</a>
+							<button id="profile-card-logout" class="outline">Logout</button>
+						</div>
+					</div>
+				</div>
+			</section>
+		</section>
+	</main>
+
+	<div class="footer-divider"></div>
+
+	<footer>
+		<div class="footer-content">
+			<div class="footer-section">
+				<h3>Contact Us</h3>
+				<p>Email: info@snackers.com</p>
+				<p>Phone: 01204416889</p>
+			</div>
+		</div>
+	</footer>
+
+	<div id="login-page" class="login-page" style="display:none;">
+		<div class="login-container">
+			<div class="login-box">
+				<h1>Snackers</h1>
+				<h2>Login / Register</h2>
+				<form id="auth-form">
+					<div class="form-group">
+						<label for="auth-email">Email</label>
+						<input type="email" id="auth-email" required>
+					</div>
+					<div class="form-group" id="password-group">
+						<label for="auth-password">Password</label>
+						<input type="password" id="auth-password" required>
+					</div>
+					<div class="auth-links">
+						<a href="#" id="forgot-password-link">Forgot password?</a>
+						<a href="#" id="create-account-link">Create account</a>
+					</div>
+					<button type="button" id="send-code-btn">Send Verification Code</button>
+					<div class="form-group" id="code-group" style="display:none;">
+						<label for="auth-code">Verification Code</label>
+						<input type="text" id="auth-code" maxlength="6" pattern="\d{6}" placeholder="Enter 6-digit code">
+					</div>
+					<button type="submit" id="auth-submit-btn" style="display:none;">Verify & Login</button>
+				</form>
+				<div id="auth-message"></div>
+				<button id="back-to-home" class="back-btn">← Back to Home</button>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		document.addEventListener('DOMContentLoaded', () => {
+			const form = document.getElementById('suggestion-form');
+			if (form) form.addEventListener('submit', handleSuggestions);
+			updateAuthUI();
+			renderProfileSection();
+		});
+	</script>
+</body>
+</html>

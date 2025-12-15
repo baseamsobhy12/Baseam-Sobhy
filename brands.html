@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Brands - Snackers</title>
+	<link rel="stylesheet" href="snckers.css">
+	<script src="snackers.js" defer></script>
+	<style>
+		.brands-hero {
+			background: linear-gradient(135deg, #FF6B00 0%, #FF9800 100%);
+			color: #fff;
+			padding: 3rem 1rem;
+			text-align: center;
+		}
+		.brands-hero h1 {
+			font-size: 2.8rem;
+			margin-bottom: 0.5rem;
+			font-weight: 900;
+		}
+		.brands-container {
+			max-width: 1200px;
+			margin: 0 auto;
+			padding: 2rem 1rem;
+		}
+		.brand-showcase {
+			display: grid;
+			grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+			gap: 2rem;
+			margin-top: 2rem;
+		}
+		.brand-item {
+			background: linear-gradient(135deg, #1f1f1f 0%, #2a2a2a 100%);
+			border-radius: 12px;
+			padding: 2rem;
+			text-align: center;
+			cursor: pointer;
+			transition: all 0.3s;
+			border: 2px solid transparent;
+			box-shadow: 0 8px 24px rgba(255,107,0,0.1);
+		}
+		.brand-item:hover {
+			transform: translateY(-12px);
+			border-color: #FF6B00;
+			box-shadow: 0 16px 40px rgba(255,107,0,0.3);
+		}
+		.brand-logo {
+			font-size: 4rem;
+			margin-bottom: 1rem;
+		}
+		.brand-item h3 {
+			color: #FF6B00;
+			font-size: 1.6rem;
+			margin-bottom: 0.5rem;
+		}
+		.brand-count {
+			color: #FF9800;
+			font-weight: 700;
+			margin-bottom: 1rem;
+		}
+		.brand-item p {
+			color: #ddd;
+			font-size: 0.95rem;
+			line-height: 1.6;
+			margin-bottom: 1.5rem;
+		}
+		.view-btn {
+			background: linear-gradient(90deg, #FF6B00, #FF9800);
+			color: #fff;
+			border: none;
+			padding: 0.7rem 1.5rem;
+			border-radius: 6px;
+			cursor: pointer;
+			font-weight: 700;
+			transition: all 0.3s;
+		}
+		.view-btn:hover {
+			transform: scale(1.05);
+			box-shadow: 0 8px 20px rgba(255,107,0,0.3);
+		}
+	</style>
+</head>
+<body>
+	<header>
+		<nav class="main-nav">
+			<div class="logo">
+				<a href="snackers.html" style="text-decoration:none; color:inherit;">
+					<h1>Snackers</h1>
+				</a>
+			</div>
+			<div class="nav-links">
+				<a href="home.html">Home</a>
+				<a href="brands.html">Brands</a>
+				<a href="suggestions.html">Suggestions</a>
+				<a href="special-offers.html">Special Offers</a>
+				<span id="user-info"></span>
+				<button id="login-btn" class="login-btn">Login / Register</button>
+			</div>
+		</nav>
+	</header>
+
+	<div id="profile-display" class="profile-display" style="display:none;"></div>
+
+	<main>
+		<section class="brands-hero">
+			<h1>Explore Our Brands</h1>
+			<p>Over 12 famous global brands</p>
+		</section>
+
+		<section class="brands-container">
+			<div class="brand-showcase" id="brand-showcase"></div>
+		</section>
+
+		<section id="profile-section" style="display:none; margin-top:2rem; margin-bottom:2rem;">
+			<div class="profile-card">
+				<img id="profile-card-avatar" class="profile-card-avatar" src="" alt="Profile avatar">
+				<div class="profile-card-info">
+					<h3 id="profile-card-name"></h3>
+					<p id="profile-card-bio"></p>
+					<div class="profile-card-actions">
+						<a id="profile-card-edit" href="profile.html" class="outline">Edit Profile</a>
+						<button id="profile-card-logout" class="outline">Logout</button>
+					</div>
+				</div>
+			</div>
+		</section>
+	</main>
+
+	<div class="footer-divider"></div>
+
+	<footer>
+		<div class="footer-content">
+			<div class="footer-section">
+				<h3>Contact Us</h3>
+				<p>Email: info@snackers.com</p>
+				<p>Phone: 01204416889</p>
+			</div>
+		</div>
+	</footer>
+
+	<div id="login-page" class="login-page" style="display:none;">
+		<div class="login-container">
+			<div class="login-box">
+				<h1>Snackers</h1>
+				<h2>Login / Register</h2>
+				<form id="auth-form">
+					<div class="form-group">
+						<label for="auth-email">Email</label>
+						<input type="email" id="auth-email" required>
+					</div>
+					<div class="form-group" id="password-group">
+						<label for="auth-password">Password</label>
+						<input type="password" id="auth-password" required>
+					</div>
+					<div class="auth-links">
+						<a href="#" id="forgot-password-link">Forgot password?</a>
+						<a href="#" id="create-account-link">Create account</a>
+					</div>
+					<button type="button" id="send-code-btn">Send Verification Code</button>
+					<div class="form-group" id="code-group" style="display:none;">
+						<label for="auth-code">Verification Code</label>
+						<input type="text" id="auth-code" maxlength="6" pattern="\d{6}" placeholder="Enter 6-digit code">
+					</div>
+					<button type="submit" id="auth-submit-btn" style="display:none;">Verify & Login</button>
+				</form>
+				<div id="auth-message"></div>
+				<button id="back-to-home" class="back-btn">← Back to Home</button>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		const brandData = {
+			nike: { logo: '👟', desc: 'Legendary sports shoes', count: 3 },
+			adidas: { logo: '🏃', desc: 'Performance and comfort', count: 3 },
+			puma: { logo: '🐆', desc: 'Speed and style', count: 2 },
+			reebok: { logo: '⚡', desc: 'Innovation and comfort', count: 2 },
+			'new-balance': { logo: '⭐', desc: 'Perfect balance', count: 2 },
+			converse: { logo: '🎨', desc: 'Classic style', count: 2 },
+			vans: { logo: '🛹', desc: 'Youth culture', count: 2 },
+			skechers: { logo: '☁️', desc: 'Maximum comfort', count: 2 },
+			under: { logo: '💪', desc: 'High performance', count: 2 },
+			fila: { logo: '✨', desc: 'Fashion and style', count: 2 },
+			active: { logo: '🏃‍♂️', desc: 'For everyday use', count: 2 }
+		};
+
+		document.addEventListener('DOMContentLoaded', () => {
+			const showcase = document.getElementById('brand-showcase');
+			for (const [key, data] of Object.entries(brandData)) {
+				const card = document.createElement('div');
+				card.className = 'brand-item';
+				card.innerHTML = `
+					<div class="brand-logo">${data.logo}</div>
+					<h3>${key.replace('-', ' ').toUpperCase()}</h3>
+					<div class="brand-count">${data.count} products</div>
+					<p>${data.desc}</p>
+					<button class="view-btn" onclick="alert('Redirecting to products')">View Products</button>
+				`;
+				showcase.appendChild(card);
+			}
+			updateAuthUI();
+			renderProfileSection();
+		});
+	</script>
+</body>
+</html>

@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width,initial-scale=1" />
+	<title>Profile - Snackers</title>
+	<link rel="stylesheet" href="snckers.css">
+	<script src="snackers.js" defer></script>
+	<style>
+		/* صفحة الملف الشخصي: تنسيق إضافي محلي */
+		body { background: #0f0f0f; color: #fff; }
+		.container { max-width:1100px; margin:2.5rem auto; padding:1.25rem; }
+		.profile-card-wrap { display:grid; grid-template-columns: 320px 1fr; gap:1.6rem; align-items:start; background:#141414; padding:1.6rem; border-radius:12px; box-shadow:0 10px 40px rgba(0,0,0,0.6); }
+		.avatar-large { width: 100%; max-width: 280px; height: 280px; border-radius:14px; object-fit:cover; border:6px solid rgba(255,107,0,0.08); background:#111; display:block; margin:0 auto; }
+		.avatar-actions { display:flex; gap:0.6rem; justify-content:center; margin-top:0.8rem; }
+		.avatar-upload, .avatar-remove { background:transparent; border:2px solid rgba(255,107,0,0.12); color:#FFB67A; padding:0.6rem 0.9rem; border-radius:8px; cursor:pointer; font-weight:700; }
+		.avatar-upload:hover, .avatar-remove:hover { background:rgba(255,107,0,0.04); }
+		.right-col { padding-top:4px; }
+		.right-col h2 { color:var(--primary-color); margin-bottom:0.6rem; font-size:1.5rem; }
+		.form-row { display:flex; gap:0.8rem; margin-bottom:0.9rem; }
+		.form-row .form-col { flex:1; display:flex; flex-direction:column; }
+		label { color:#FFB67A; font-weight:700; margin-bottom:0.35rem; }
+		input[type="text"], input[type="email"], input[type="tel"], textarea { padding:0.75rem; border-radius:8px; border:1px solid #333; background:#0b0b0b; color:#fff; resize:vertical; }
+		.actions { display:flex; gap:0.8rem; margin-top:1rem; }
+		.btn-primary { background:linear-gradient(90deg,#FF6B00,#FF9800); color:#fff; border:none; padding:0.8rem 1rem; border-radius:8px; cursor:pointer; font-weight:800; }
+		.btn-outline { background:transparent; color:#FF9E59; border:2px solid rgba(255,107,0,0.12); padding:0.7rem 0.9rem; border-radius:8px; cursor:pointer; font-weight:700; }
+		.meta { color:#ddd; font-size:0.95rem; margin-top:0.6rem; }
+		.note { color:#cfcfcf; font-size:0.92rem; margin-top:0.8rem; }
+		@media (max-width:880px) {
+			.profile-card-wrap { grid-template-columns: 1fr; }
+			.avatar-large { height: 220px; max-width:220px; }
+		}
+	</style>
+</head>
+<body>
+	<header style="padding:1rem 0;background:#0b0b0b">
+		<div style="max-width:1100px;margin:0 auto;padding:0 1rem;display:flex;justify-content:space-between;align-items:center;">
+			<a href="snackers.html" style="text-decoration:none; color:inherit;">
+				<h1 style="color:var(--primary-color);margin:0">Snackers</h1>
+			</a>
+			<div>
+				<a href="snackers.html" style="color:#FFB67A;text-decoration:none;font-weight:700;margin-left:0.6rem;">Back</a>
+			</div>
+		</div>
+	</header>
+
+	<main class="container">
+		<div class="profile-card-wrap" role="region" aria-label="Profile card">
+			<!-- LEFT: avatar -->
+			<div style="text-align:center;">
+				<img id="profile-avatar-img" class="avatar-large" src="" alt="Profile avatar">
+				<div class="avatar-actions">
+					<label class="avatar-upload" for="profile-avatar-input">Change photo</label>
+					<input id="profile-avatar-input" type="file" accept="image/*" style="display:none">
+					<button id="profile-remove-avatar" class="avatar-remove" type="button">Remove</button>
+				</div>
+				<div id="profile-created" class="meta" aria-live="polite"></div>
+			</div>
+
+			<!-- RIGHT: fields -->
+			<div class="right-col">
+				<h2>Account Details</h2>
+
+				<div class="form-row">
+					<div class="form-col">
+						<label for="profile-email">Email</label>
+						<input id="profile-email" type="email" readonly>
+					</div>
+					<div class="form-col">
+						<label for="profile-name">Display Name</label>
+						<input id="profile-name" type="text" placeholder="Display name">
+					</div>
+				</div>
+
+				<div class="form-row">
+					<div class="form-col">
+						<label for="profile-phone">Phone</label>
+						<input id="profile-phone" type="tel" placeholder="+1 555-555-5555">
+					</div>
+					<div class="form-col">
+						<label for="profile-role">Role</label>
+						<input id="profile-role" type="text" placeholder="e.g. buyer / seller" disabled>
+					</div>
+				</div>
+
+				<div style="margin-bottom:0.6rem;">
+					<label for="profile-bio">About You</label>
+					<textarea id="profile-bio" rows="5" placeholder="Short bio or preferences..."></textarea>
+				</div>
+
+				<div class="actions" role="group" aria-label="profile actions">
+					<button id="profile-save" class="btn-primary">Save Changes</button>
+					<button id="profile-logout" class="btn-outline">Log Out</button>
+				</div>
+
+				<div id="profile-msg" class="note" aria-live="polite"></div>
+			</div>
+		</div>
+	</main>
+
+	<script>
+		// صغير: التعامل مع رفع الصورة ومعاينة + حفظ باستخدام دوال snackers.js (getProfile/setProfile)
+		function readFileAsDataURL(file){ return new Promise((res,rej)=>{ const fr=new FileReader(); fr.onload=()=>res(fr.result); fr.onerror=rej; fr.readAsDataURL(file); }); }
+
+		document.addEventListener('DOMContentLoaded', ()=>{
+			const current = localStorage.getItem('snackers_current');
+			const msg = document.getElementById('profile-msg');
+			if (!current) { msg.textContent = 'You are not logged in. Please sign in first.'; msg.style.color = '#FF6B00'; return; }
+
+			// APIs from snackers.js
+			const profile = (typeof getProfile === 'function') ? (getProfile(current) || (typeof createProfileIfMissing === 'function' ? createProfileIfMissing(current) : null)) : null;
+			if (!profile) { msg.textContent = 'Failed to load profile data.'; return; }
+
+			const emailInput = document.getElementById('profile-email');
+			const nameInput = document.getElementById('profile-name');
+			const phoneInput = document.getElementById('profile-phone');
+			const bioInput = document.getElementById('profile-bio');
+			const avatarImg = document.getElementById('profile-avatar-img');
+			const avatarInput = document.getElementById('profile-avatar-input');
+			const createdDiv = document.getElementById('profile-created');
+
+			const placeholder = 'data:image/svg+xml;utf8,' + encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='480' height='480'><rect fill='%23111' width='100%' height='100%'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-size='120' fill='%23FF6B00'>${(profile.displayName||'U')[0].toUpperCase()}</text></svg>`);
+
+			emailInput.value = profile.email || current;
+			nameInput.value = profile.displayName || '';
+			phoneInput.value = profile.phone || '';
+			bioInput.value = profile.bio || '';
+
+			avatarImg.src = profile.avatar || placeholder;
+
+			avatarInput.onchange = async (e) => {
+				const f = e.target.files && e.target.files[0];
+				if (!f) return;
+				try {
+					const dataUrl = await readFileAsDataURL(f);
+					avatarImg.src = dataUrl;
+					avatarImg.dataset.pending = dataUrl;
+					msg.style.color = '#FFB67A';
+				} 
+                catch {
+					msg.textContent = 'Failed to read image.';
+					msg.style.color = '#FF6B00';
+				}
+			};
+
+			document.getElementById('profile-remove-avatar').onclick = () => {
+				delete avatarImg.dataset.pending;
+				avatarImg.src = placeholder;
+				msg.textContent = 'Avatar removed (save to apply).';
+				msg.style.color = '#FFB67A';
+			};
+
+			document.getElementById('profile-save').onclick = () => {
+				const newName = nameInput.value.trim() || profile.displayName;
+				const newPhone = phoneInput.value.trim();
+				const newBio = bioInput.value.trim();
+				const newAvatar = avatarImg.dataset.pending !== undefined ? avatarImg.dataset.pending : (profile.avatar || '');
+				if (typeof setProfile === 'function') {
+					setProfile(current, { displayName: newName, phone: newPhone, bio: newBio, avatar: newAvatar });
+					delete avatarImg.dataset.pending;
+					msg.textContent = 'Profile saved.';
+					msg.style.color = '#4caf50';
+					if (typeof updateAuthUI === 'function') updateAuthUI();
+				} else {
+					msg.textContent = 'Save API not available.';
+					msg.style.color = '#FF6B00';
+				}
+			};
+
+			document.getElementById('profile-logout').onclick = () => {
+				localStorage.removeItem('snackers_current');
+				if (typeof updateAuthUI === 'function') updateAuthUI();
+				location.href = 'snackers.html';
+			};
+		});
+	</script>
+</body>
+</html>

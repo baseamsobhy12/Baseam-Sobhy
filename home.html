@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Home - Snackers</title>
+	<link rel="stylesheet" href="snckers.css">
+	<script src="snackers.js" defer></script>
+	<style>
+		.hero-section {
+			background: linear-gradient(135deg, #FF6B00 0%, #FF9800 100%);
+			color: #fff;
+			padding: 6rem 1rem;
+			text-align: center;
+			animation: fadeInDown 0.8s;
+		}
+		.hero-section h1 {
+			font-size: 3.5rem;
+			margin-bottom: 1rem;
+			text-shadow: 0 4px 12px rgba(0,0,0,0.2);
+			font-weight: 900;
+			letter-spacing: 3px;
+		}
+		.hero-section p {
+			font-size: 1.4rem;
+			margin-bottom: 2rem;
+			opacity: 0.95;
+			line-height: 1.6;
+		}
+		.cta-buttons {
+			display: flex;
+			gap: 1.2rem;
+			justify-content: center;
+			flex-wrap: wrap;
+		}
+		.cta-btn {
+			padding: 1rem 2rem;
+			border-radius: 8px;
+			font-weight: 900;
+			border: none;
+			cursor: pointer;
+			font-size: 1.1rem;
+			transition: all 0.3s;
+			text-decoration: none;
+			display: inline-block;
+		}
+		.cta-primary {
+			background: #fff;
+			color: #FF6B00;
+		}
+		.cta-primary:hover {
+			transform: translateY(-4px);
+			box-shadow: 0 12px 30px rgba(0,0,0,0.3);
+		}
+		.cta-secondary {
+			background: rgba(255,255,255,0.15);
+			color: #fff;
+			border: 2px solid #fff;
+		}
+		.cta-secondary:hover {
+			background: rgba(255,255,255,0.25);
+		}
+		.features-section {
+			max-width: 1200px;
+			margin: 4rem auto;
+			padding: 0 1rem;
+		}
+		.features-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+			gap: 2rem;
+			margin-top: 2rem;
+		}
+		.feature-card {
+			background: linear-gradient(135deg, #1f1f1f 0%, #2a2a2a 100%);
+			padding: 2rem;
+			border-radius: 12px;
+			border-left: 4px solid #FF6B00;
+			box-shadow: 0 8px 24px rgba(255,107,0,0.1);
+			transition: all 0.3s;
+		}
+		.feature-card:hover {
+			transform: translateY(-8px);
+			box-shadow: 0 16px 40px rgba(255,107,0,0.2);
+			border-left-color: #FF9800;
+		}
+		.feature-card h3 {
+			color: #FF6B00;
+			font-size: 1.5rem;
+			margin-bottom: 0.8rem;
+		}
+		.feature-card p {
+			color: #ddd;
+			line-height: 1.8;
+		}
+		.icon {
+			font-size: 2.5rem;
+			margin-bottom: 1rem;
+		}
+	</style>
+</head>
+<body>
+	<header>
+		<nav class="main-nav">
+			<div class="logo">
+				<a href="snackers.html" style="text-decoration:none; color:inherit;">
+					<h1>Snackers</h1>
+				</a>
+			</div>
+			<div class="nav-links">
+				<a href="home.html">Home</a>
+				<a href="brands.html">Brands</a>
+				<a href="suggestions.html">Suggestions</a>
+				<a href="special-offers.html">Special Offers</a>
+				<span id="user-info"></span>
+				<button id="login-btn" class="login-btn">Login / Register</button>
+			</div>
+		</nav>
+	</header>
+
+	<div id="profile-display" class="profile-display" style="display:none;"></div>
+
+	<main>
+		<section class="hero-section">
+			<h1>Welcome to Snackers</h1>
+			<p>The ultimate platform for premium sneakers and global brands</p>
+			<div class="cta-buttons">
+				<a href="brands.html" class="cta-btn cta-primary">Browse Brands</a>
+				<a href="special-offers.html" class="cta-btn cta-secondary">Special Offers</a>
+			</div>
+		</section>
+
+		<section class="features-section">
+			<h2 style="text-align:center; color:#FF6B00; font-size:2.2rem; margin-bottom:1rem;">Why Choose Snackers?</h2>
+			<div class="features-grid">
+				<div class="feature-card">
+					<div class="icon">👟</div>
+					<h3>Global Brands</h3>
+					<p>Over 12 famous brands including Nike, Adidas, Puma and more.</p>
+				</div>
+				<div class="feature-card">
+					<div class="icon">💰</div>
+					<h3>Competitive Prices</h3>
+					<p>Best prices with regular special offers and discounts.</p>
+				</div>
+				<div class="feature-card">
+					<div class="icon">🔍</div>
+					<h3>Easy Search</h3>
+					<p>Find the perfect shoe easily with advanced filters and personalized suggestions.</p>
+				</div>
+				<div class="feature-card">
+					<div class="icon">👤</div>
+					<h3>Your Profile</h3>
+					<p>Create a personal account, save preferences and manage your purchase history.</p>
+				</div>
+			</div>
+		</section>
+
+		<section id="profile-section" style="display:none; margin-top:2rem; margin-bottom:2rem;">
+			<div class="profile-card">
+				<img id="profile-card-avatar" class="profile-card-avatar" src="" alt="Profile avatar">
+				<div class="profile-card-info">
+					<h3 id="profile-card-name"></h3>
+					<p id="profile-card-bio"></p>
+					<div class="profile-card-actions">
+						<a id="profile-card-edit" href="profile.html" class="outline">Edit Profile</a>
+						<button id="profile-card-logout" class="outline">Logout</button>
+					</div>
+				</div>
+			</div>
+		</section>
+	</main>
+
+	<div class="footer-divider"></div>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Contact</h3>
+                <p>Email: info@snackers.com</p>
+                <p>Phone: 01204416889</p>
+            </div>
+            <div class="footer-section">
+                <h3>Follow Us</h3>
+                <div class="social-links">
+                    <a href="https://github.com/bebosophy" target="_blank" aria-label="GitHub">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.6.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v 3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                        </svg>
+                    </a>
+                    <a href="https://www.facebook.com/baseam.sophy" target="_blank" aria-label="Facebook">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                        </svg>
+                    </a>
+                    <a href="https://www.instagram.com/bebo.132012" target="_blank" aria-label="Instagram">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                            <rect x="2" y="2" width="20" height="20" rx="5" ry="5" fill="none" stroke="currentColor" stroke-width="2"/>
+                            <circle cx="12" cy="12" r="5" fill="none" stroke="currentColor" stroke-width="2"/>
+                            <circle cx="18" cy="6" r="1.5" fill="currentColor"/>
+                        </svg>
+                    </a>
+                    <a href="https://x.com/BaseamSophy80" target="_blank" aria-label="Twitter (X)">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24h-6.514l-5.106-6.694-5.829 6.694h-3.308l7.735-8.835L2.25 2.25h6.514l4.821 6.375L18.244 2.25zM17.41 20.452h1.828L6.97 3.966H5.085l12.325 16.486z"/>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+	<!-- ... existing modals ... -->
+	<div id="login-page" class="login-page" style="display:none;">
+		<div class="login-container">
+			<div class="login-box">
+				<h1>Snackers</h1>
+				<h2>Login / Register</h2>
+				<form id="auth-form">
+					<div class="form-group">
+						<label for="auth-email">Email</label>
+						<input type="email" id="auth-email" required>
+					</div>
+					<div class="form-group" id="password-group">
+						<label for="auth-password">Password</label>
+						<input type="password" id="auth-password" required>
+					</div>
+					<div class="auth-links">
+						<a href="#" id="forgot-password-link">Forgot password?</a>
+						<a href="#" id="create-account-link">Create account</a>
+					</div>
+					<button type="button" id="send-code-btn">Send Verification Code</button>
+					<div class="form-group" id="code-group" style="display:none;">
+						<label for="auth-code">Verification Code</label>
+						<input type="text" id="auth-code" maxlength="6" pattern="\d{6}" placeholder="Enter 6-digit code">
+					</div>
+					<button type="submit" id="auth-submit-btn" style="display:none;">Verify & Login</button>
+				</form>
+				<div id="auth-message"></div>
+				<button id="back-to-home" class="back-btn">← Back to Home</button>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		document.addEventListener('DOMContentLoaded', () => {
+			updateAuthUI();
+			renderProfileSection();
+		});
+	</script>
+</body>
+</html>

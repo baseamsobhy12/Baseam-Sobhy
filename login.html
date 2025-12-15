@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width,initial-scale=1" />
+	<title>Login - Snackers</title>
+	<link rel="stylesheet" href="snckers.css" />
+	<!-- include app logic so we can call createProfileIfMissing / updateAuthUI -->
+	<script src="snackers.js" defer></script>
+	<style>
+		/* Quick fixes specific to the login page */
+		.login-page { display:flex; align-items:center; justify-content:center; padding:2rem; }
+		.login-box { width:100%; max-width:420px; padding:2rem; }
+		.form-row { display:flex; gap:0.6rem; align-items:center; }
+		.password-wrap { position:relative; width:100%; }
+		.toggle-pass { position:absolute; right:8px; top:50%; transform:translateY(-50%); background:transparent; border:none; color:#FF9800; cursor:pointer; font-weight:700; }
+		.small-note { font-size:0.92rem; color:#ddd; margin-top:0.5rem; }
+		@media (max-width:480px) {
+			.login-box { padding:1.2rem; }
+			.login-page { padding:1rem; }
+		}
+	</style>
+</head>
+<body>
+	<div class="login-page" id="page" aria-hidden="true" style="display:none;">
+		<div class="login-container">
+			<div class="login-box" role="dialog" aria-modal="true" aria-labelledby="auth-title">
+				<a href="snackers.html" style="text-decoration:none;color:inherit"><h1 id="auth-title" style="color:var(--primary-color);text-align:center">Snackers</h1></a>
+
+				<div id="auth-tabs" style="display:flex;gap:8px;justify-content:center;margin-bottom:16px;">
+					<button data-mode="login" class="tab-btn">Login</button>
+					<button data-mode="register" class="tab-btn">Register</button>
+					<button data-mode="reset" class="tab-btn">Reset Password</button>
+				</div>
+
+				<!-- Social / OAuth simulation -->
+				<div style="display:flex;gap:8px;justify-content:center;margin-bottom:14px;">
+					<button id="google-connect" class="login-btn" style="background:#4285F4">Connect with Google</button>
+					<button id="facebook-connect" class="login-btn" style="background:#1877F2">Connect with Facebook</button>
+				</div>
+
+				<form id="auth-form" autocomplete="on" novalidate>
+					<!-- common fields -->
+					<div class="form-group">
+						<label for="auth-email">Email</label>
+						<input type="email" id="auth-email" placeholder="you@example.com" required>
+					</div>
+
+					<div class="form-group password-wrap" id="password-row">
+						<label for="auth-password">Password</label>
+						<input type="password" id="auth-password" placeholder="Enter your password">
+						<button type="button" class="toggle-pass" id="toggle-pass" aria-label="Show password">Show</button>
+					</div>
+
+					<!-- used for register (optional display) -->
+					<div class="form-group" id="register-name-row" style="display:none;">
+						<label for="auth-name">Display name</label>
+						<input type="text" id="auth-name" placeholder="Your display name (optional)">
+					</div>
+
+					<!-- verification code -->
+					<div class="form-group" id="code-group" style="display:none;">
+						<label for="auth-code">Verification code</label>
+						<input type="text" id="auth-code" maxlength="6" pattern="\d{6}" placeholder="6 digits">
+					</div>
+
+					<!-- new password for reset -->
+					<div class="form-group" id="new-pass-row" style="display:none;">
+						<label for="new-password">New password</label>
+						<input type="password" id="new-password" placeholder="Enter new password">
+					</div>
+
+					<div style="display:flex;gap:8px;margin-top:8px;">
+						<button type="button" id="primary-action" class="login-box-btn" style="flex:1;">Continue</button>
+						<button type="button" id="send-code-btn" style="flex:1;background:linear-gradient(90deg,#FF6B00,#FF9800)">Send Code</button>
+					</div>
+
+					<div id="auth-message" style="margin-top:0.9rem; min-height:1.2em; font-weight:700; color:#FF6B00;"></div>
+
+					<div style="display:flex;justify-content:space-between;margin-top:10px;">
+						<a href="#" id="forgot-password-link">Forgot password?</a>
+						<a href="#" id="create-account-link">Create account</a>
+					</div>
+
+					<p class="small-note" style="text-align:center;margin-top:0.9rem">
+						We will send a verification code to your email.
+					</p>
+				</form>
+
+				<div style="text-align:center;margin-top:1rem">
+					<a href="snackers.html" style="color:#FF9800;text-decoration:none;">← Back to home</a>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		// ...existing code dependencies are in snackers.js (createProfileIfMissing, updateAuthUI, setProfile, etc.) ...
+
+		// small helpers
+		function showAuthMsg(msg, ok = false) {
+			const el = document.getElementById('auth-message');
+			el.style.color = ok ? '#4caf50' : '#FF6B00';
+			el.textContent = msg;
+		}
+		async function apiPost(path, body) {
+			try {
+				const res = await fetch(path, {
+					method: 'POST', headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify(body)
+				});
+				return await res.json();
+			} catch (e) {
+				return { ok: false, error: 'network' };
+			}
+		}
+
+		// Tab / UI handling
+		let mode = 'login';
+		const tabButtons = document.querySelectorAll('.tab-btn');
+		function setMode(m) {
+			mode = m;
+			document.getElementById('register-name-row').style.display = (m === 'register') ? '' : 'none';
+			document.getElementById('password-row').style.display = (m !== 'reset') ? '' : 'none';
+			document.getElementById('new-pass-row').style.display = (m === 'reset') ? 'none' : 'none'; // shown after code verify
+			document.getElementById('code-group').style.display = 'none';
+			showAuthMsg('');
+			tabButtons.forEach(b => b.style.opacity = (b.dataset.mode === m) ? '1' : '0.6');
+		}
+		tabButtons.forEach(b => b.addEventListener('click', ()=> setMode(b.dataset.mode)));
+		setMode('login');
+
+		// password toggle
+		const passInput = document.getElementById('auth-password');
+		const toggleBtn = document.getElementById('toggle-pass');
+		toggleBtn.addEventListener('click', ()=> {
+			if (passInput.type === 'password') { passInput.type = 'text'; toggleBtn.textContent = 'Hide'; }
+			else { passInput.type = 'password'; toggleBtn.textContent = 'Show'; }
+		});
+
+		// Primary action button handler (behaves depending on mode)
+		document.getElementById('primary-action').addEventListener('click', async () => {
+			const email = document.getElementById('auth-email').value.trim().toLowerCase();
+			const password = document.getElementById('auth-password').value.trim();
+			const name = document.getElementById('auth-name').value.trim();
+
+			if (!email) { showAuthMsg('Enter email'); return; }
+
+			if (mode === 'register') {
+				if (!password) { showAuthMsg('Choose a password'); return; }
+				// try server
+				const res = await apiPost('/api/create-account', { email, password });
+				if (res && res.ok) {
+					showAuthMsg('Verification code sent to your email (or opened mail client).', true);
+					document.getElementById('code-group').style.display = '';
+				} else if (res && res.error === 'network') {
+					// fallback to local storage
+					if (typeof createAccount === 'function') {
+						const r = createAccount(email, password);
+						showAuthMsg(r.ok ? r.msg : r.msg, r.ok);
+						if (r.ok) document.getElementById('code-group').style.display = '';
+					} else showAuthMsg('Server and local create unavailable');
+				} else {
+					showAuthMsg(res.msg || 'Failed to create account');
+				}
+			} else if (mode === 'login') {
+				// login via password
+				if (!password) { showAuthMsg('Enter password or request code.'); return; }
+				const res = await apiPost('/api/login', { email, password });
+				if (res && res.ok) {
+					// success
+					localStorage.setItem('snackers_current', email);
+					if (typeof createProfileIfMissing === 'function') createProfileIfMissing(email);
+					showAuthMsg('Logged in', true);
+					updateAuthUI();
+					setTimeout(()=> { document.getElementById('page').style.display='none'; document.body.style.overflow=''; }, 600);
+				} else if (res && res.error === 'network') {
+					// fallback local
+					if (typeof attemptLogin === 'function') {
+						const ok = attemptLogin(email, password, '');
+						if (ok) { localStorage.setItem('snackers_current', email); createProfileIfMissing(email); updateAuthUI(); showAuthMsg('Logged in (local)', true); setTimeout(()=> { document.getElementById('page').style.display='none'; document.body.style.overflow=''; }, 600); }
+						else showAuthMsg('Login failed (local)');
+					} else showAuthMsg('Network error');
+				} else {
+					showAuthMsg(res.msg || 'Login failed');
+				}
+			} else if (mode === 'reset') {
+				// After code verified, user will see new-password field and primary action becomes "Set new password"
+				const codeVisible = document.getElementById('code-group').style.display !== 'none';
+				if (!codeVisible) { showAuthMsg('Click "Send Code" first'); return; }
+				const code = document.getElementById('auth-code').value.trim();
+				const newPass = document.getElementById('new-password').value.trim();
+				if (!code || !newPass) { showAuthMsg('Enter code and new password'); return; }
+
+				// try server reset
+				const res = await apiPost('/api/reset-password', { email, code, newPassword: newPass });
+				if (res && res.ok) {
+					showAuthMsg('Password reset. You can login now.', true);
+					// also set local fallback
+					const users = (typeof loadUsers === 'function') ? loadUsers() : {};
+					if (users[email]) { users[email.toLowerCase()].password = newPass; try { localStorage.setItem('snackers_users', JSON.stringify(users)); } catch(e){} }
+					setMode('login');
+				} else if (res && res.error === 'network') {
+					// fallback: verify via localStorage
+					if (typeof verifyCode === 'function') {
+						const okLocal = verifyCode(email, document.getElementById('auth-code').value.trim());
+						if (okLocal) {
+							setUser(email, { password: newPass });
+							showAuthMsg('Password reset (local). You can login now.', true);
+							setMode('login');
+						} else showAuthMsg('Invalid code (local).');
+					} else showAuthMsg('Network error');
+				} else {
+					showAuthMsg(res.msg || 'Reset failed');
+				}
+			}
+		});
+
+		// Send code button (register/login/reset flows)
+		document.getElementById('send-code-btn').addEventListener('click', async () => {
+			const email = document.getElementById('auth-email').value.trim().toLowerCase();
+			if (!email) { showAuthMsg('Enter email first'); return; }
+			// If user exists on server, send code; else instruct to register
+			const res = await apiPost('/api/send-code', { email, purpose: mode === 'reset' ? 'Password Reset' : 'Login Verification' });
+			if (res && res.ok) {
+				document.getElementById('code-group').style.display = '';
+				showAuthMsg(res.msg || 'Code sent', true);
+				if (res.debugCode) console.log('debug code:', res.debugCode);
+			} else if (res && res.error === 'network') {
+				// fallback local send
+				if (typeof sendCodeForExistingEmail === 'function') {
+					const r = sendCodeForExistingEmail(email, mode === 'reset' ? 'Password Reset' : 'Login Verification');
+					showAuthMsg(r.msg || (r.ok ? 'Code ready (local)' : 'No account (local)'), r.ok);
+					if (r.ok) document.getElementById('code-group').style.display = '';
+				} else showAuthMsg('Network error');
+			} else {
+				showAuthMsg(res.msg || 'Failed to send code');
+			}
+		});
+
+		// Create account link quick action: switch to register tab
+		document.getElementById('create-account-link').addEventListener('click', (e)=>{ e.preventDefault(); setMode('register'); });
+
+		// Forgot password link quick action
+		document.getElementById('forgot-password-link').addEventListener('click', (e)=>{ e.preventDefault(); setMode('reset'); });
+
+		// OAuth simulation: prompt for email and auto-create/login
+		async function oauthSim(provider) {
+			const email = prompt(`Enter your ${provider} email to connect (simulation)` , '');
+			if (!email) return;
+			// try create account via server with random password
+			const randomPass = Math.random().toString(36).slice(2,10);
+			const res = await apiPost('/api/create-account', { email, password: randomPass });
+			if (res && res.ok) {
+				// after create, auto-verify using debug code if provided OR just set local session
+				localStorage.setItem('snackers_current', email.toLowerCase());
+				if (typeof createProfileIfMissing === 'function') createProfileIfMissing(email);
+				showAuthMsg(`${provider} connected. Logged in as ${email}`, true);
+				updateAuthUI();
+				setTimeout(()=> { document.getElementById('page').style.display='none'; document.body.style.overflow=''; }, 700);
+			} else if (res && res.error === 'network') {
+				// fallback local
+				if (typeof setUser === 'function') {
+					setUser(email, { password: randomPass, createdAt: Date.now() });
+					localStorage.setItem('snackers_current', email.toLowerCase());
+					if (typeof createProfileIfMissing === 'function') createProfileIfMissing(email);
+					showAuthMsg(`${provider} connected (local). Logged in as ${email}`, true);
+					updateAuthUI();
+					setTimeout(()=> { document.getElementById('page').style.display='none'; document.body.style.overflow=''; }, 700);
+				} else showAuthMsg('OAuth failed (no server and no local fallback)');
+			} else {
+				// if exists, just login
+				localStorage.setItem('snackers_current', email.toLowerCase());
+				if (typeof createProfileIfMissing === 'function') createProfileIfMissing(email);
+				showAuthMsg(`Logged in as ${email}`, true);
+				updateAuthUI();
+				setTimeout(()=> { document.getElementById('page').style.display='none'; document.body.style.overflow=''; }, 700);
+			}
+		}
+		document.getElementById('google-connect').addEventListener('click', ()=> oauthSim('Google'));
+		document.getElementById('facebook-connect').addEventListener('click', ()=> oauthSim('Facebook'));
+
+		// show/hide modal when header login button clicked (header button wired in snackers.js to showLoginPage)
+		function showLoginModal() {
+			document.getElementById('page').style.display = 'flex';
+			document.body.style.overflow = 'hidden';
+		}
+		// expose showLoginPage for other scripts
+		window.showLoginPage = showLoginModal;
+
+		// auto open if header triggered
+		document.addEventListener('DOMContentLoaded', ()=> {
+			// hook header login button
+			const headerLogin = document.getElementById('login-btn');
+			if (headerLogin) headerLogin.addEventListener('click', showLoginModal);
+		});
+	</script>
+</body>
+</html>
